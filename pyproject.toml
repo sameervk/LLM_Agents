@@ -1,0 +1,28 @@
+[project]
+name = "llm-agents"
+version = "0.1.0"
+description = "HuggingFace course on LLM Agents"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dotenv>=0.9.9",
+    "smolagents[litellm]>=1.17.0",
+    "torch>=2.7.0",
+    "transformers[torch]>=4.51.3",
+]
+
+
+[tool.uv.sources]
+torch = [
+    {index="pytorch-cu126"}
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+]
