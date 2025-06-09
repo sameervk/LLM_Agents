@@ -8,6 +8,7 @@ dependencies = [
     "dotenv>=0.9.9",
     "huggingface-hub[hf-xet]>=0.32.2",
     "langchain>=0.3.25",
+    "langchain-community>=0.3.24",
     "openai>=1.75.0",
     "smolagents[transformers]>=1.17.0",
     "torch>=2.7.0",
