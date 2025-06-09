@@ -7,7 +7,7 @@ import math
 @tool
 def calculate_sigmoid(x: float) -> float:
     """
-    This tools calculates the sigmoid function of a number
+    This tool calculates the sigmoid function of a number
 
     Args:
         x: a number
@@ -18,10 +18,10 @@ def calculate_sigmoid(x: float) -> float:
 if __name__=="__main__":
 
 
-    model = TransformersModel(model_id="HuggingFaceTB/SmolLM2-1.7B-Instruct",
-                              device_map="cuda", # options: cpu, cuda:0 or 'auto', 'balanced', 'balanced_low_0', 'sequential'
-                              # max_new_tokens=1024
-                              )
+    # model = TransformersModel(model_id="HuggingFaceTB/SmolLM2-1.7B-Instruct",
+    #                           device_map="cuda", # options: cpu, cuda:0 or 'auto', 'balanced', 'balanced_low_0', 'sequential'
+    #                           # max_new_tokens=1024
+    #                           )
     # models tried
     # google/codegemma-1.1-2b-GGUF
     # microsoft/Phi-3-mini-128k-instruct
@@ -47,8 +47,30 @@ if __name__=="__main__":
     # agent.run("Calculate the sigmoid of 1")
     # does not run the code with google/gemma-3-1b-it
 
-    agent = CodeAgent(tools=[calculate_sigmoid], model=model)
-    agent.run("Calculate the sigmoid of a")
+    # agent = CodeAgent(tools=[calculate_sigmoid], model=model)
+    # agent.run("Calculate the sigmoid of a")
+
+
+    # model = TransformersModel(model_id="HuggingFaceTB/SmolLM2-1.7B-Instruct",
+    #                               device_map="cuda", # options: cpu, cuda:0 or 'auto', 'balanced', 'balanced_low_0', 'sequential'
+    #                               # max_new_tokens=1024
+    #                               )
+    # agent = CodeAgent(tools=[DuckDuckGoSearchTool()], model=model)
+    # response = agent.run(
+    #     "Search for luxury superhero-themed party ideas, including decorations, entertainment, and catering."
+    # )
+    # print(response)
+    # smolllm2-1.7b gets stuck
+
+    model = TransformersModel(model_id="google/gemma-3-1b-it",
+                                  device_map="cuda", # options: cpu, cuda:0 or 'auto', 'balanced', 'balanced_low_0', 'sequential'
+                                  # max_new_tokens=1024
+                                  )
+    agent = ToolCallingAgent(tools=[DuckDuckGoSearchTool()], model=model)
+    response = agent.run(
+        "Search for luxury superhero-themed party ideas, including decorations, entertainment, and catering."
+    )
+    print(response)
 
 
 
