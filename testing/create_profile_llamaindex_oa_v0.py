@@ -52,8 +52,13 @@ if __name__=="__main__":
 
     query_engine = index.as_query_engine(
         llm=llm,
-        response_mode="tree_summarize",
+        response_mode="tree_summarize", # other options are refine, compact
     )
+
+    # Modify the player accordingly
+    player = "German"
+    file_name_to_save = f"{player}_direct_query_v0.0-2.txt"
+
     # response = query_engine.query("What information can you extract about Britain's military strength")
     # print(response)
 
@@ -64,10 +69,16 @@ if __name__=="__main__":
     # military_capability :
     # """
 
-    system_prompt = """
-        You are an expert in assessing the strength of armed forces. From this scenario, you need to assess the military capability in numbers of the British armed forces.
-        RETURN the output in HTML format only.
+    system_prompt = f"""
+        You are an expert in assessing the strength of armed forces. From this scenario, you need to assess the military capability in numbers of the {player} armed forces.
         """
     response = query_engine.query(system_prompt)
     print(response)
+
+
+    with open(Path.cwd().parent.parent.joinpath(f"tmp/{file_name_to_save}"), "w+", encoding="utf-8") as file:
+        file.write(f"System Prompt: {system_prompt}\n\n")
+        file.write(f"Response: \n")
+        file.write(response.response)
+        file.close()
 
