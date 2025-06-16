@@ -1,5 +1,7 @@
 """
-v2: Using ReAct Agent
+
+v2: Using llamaindex ReAct Agent with tools for profile generation.
+
 """
 
 import os

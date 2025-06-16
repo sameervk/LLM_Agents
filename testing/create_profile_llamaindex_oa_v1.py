@@ -1,5 +1,8 @@
 """
-v1: using Function Calling Agent
+
+v1: A single agent using llamaindex tool for querying, a vector store containing a scenario,
+and a python function tool for saving the LLM response to a file.
+
 """
 
 import os
@@ -13,18 +16,43 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
 from chromadb.errors import NotFoundError
 from llama_index.core.tools import FunctionTool, QueryEngineTool
-from llama_index.core.agent.workflow import AgentWorkflow, AgentStream
+from llama_index.core.agent.workflow import AgentWorkflow, AgentStream, BaseWorkflowAgent
 import asyncio
 
-from testing.utils.tools import save_response
+from rnd.llama_index.utils.tools import save_response
 
 
 async def run_agent(agent: AgentWorkflow, user_message: str):
+    """
+    Returns the LLM response
+    Args:
+        agent: LLM agent
+        user_message: user query
+
+    Returns: Response object
+
+    """
+
     return await agent.run(user_msg=user_msg)
 
 
-if __name__=="__main__":
+async def stream_output(agent: AgentWorkflow, user_message: str):
+    """
+    Streams the LLM response to the terminal
 
+    Args:
+        agent: The LLM agent
+        user_message: user query
+
+    """
+    handler = agent.run(user_msg=user_msg)
+
+    async for event in handler.stream_events():
+        if isinstance(event, AgentStream):
+            print(event.delta, end="", flush=True)
+
+
+if __name__=="__main__":
 
     env_loaded = dotenv.load_dotenv(Path.cwd().parent.parent.joinpath(".env"))
     if not env_loaded:
@@ -32,7 +60,6 @@ if __name__=="__main__":
     OA_TOKEN = os.getenv("OA_TOKEN")
 
     scenario_name = "arnhemdreijenseweg"
-
 
     db = chromadb.PersistentClient(path=str(Path.cwd().parent.parent.joinpath("chroma_db")))
 
@@ -77,16 +104,10 @@ if __name__=="__main__":
                                                   )
 
     user_msg = "Assess and evaluate the scenario and return the detailed military capability, in numbers, of the German armed forces. Save your response using the tool provided."
+    # user_msg = "Assess and evaluate the scenario and return the detailed military capability, in numbers, of the German armed forces."
+
 
     # response = asyncio.run(run_agent(agent=agent, user_message=user_msg))
-    #
     # print(response)
 
-    async def stream_output():
-        handler = agent.run(user_msg=user_msg)
-
-        async for event in handler.stream_events():
-            if isinstance(event, AgentStream):
-                print(event.delta, end="", flush=True)
-
-    asyncio.run(stream_output())
+    asyncio.run(stream_output(agent=agent, user_message=user_msg))

@@ -1,3 +1,9 @@
+"""
+
+v0: Using llamaindex vector query engine for scenario retrieval and LLM response to a user query.
+
+"""
+
 import os
 from pathlib import Path
 import dotenv
@@ -19,13 +25,10 @@ if __name__=="__main__":
     OA_TOKEN = os.getenv("OA_TOKEN")
 
     scenario_name = "arnhemdreijenseweg"
-    # scenario_file = scenario_name+".md"
-    # reader = SimpleDirectoryReader(input_dir="../data/scenarios", input_files=[scenario_file])
-    # documents = reader.load_data()
 
     db = chromadb.PersistentClient(path=str(Path.cwd().parent.parent.joinpath("chroma_db")))
     # db.delete_collection(scenario_name)
-    # chroma_collection = db.get_or_create_collection(scenario_name)
+
     try:
         chroma_collection = db.get_collection(scenario_name)
     except NotFoundError as err:
@@ -34,23 +37,13 @@ if __name__=="__main__":
 
     vector_store =  ChromaVectorStore(chroma_collection=chroma_collection)
 
-    # pipeline = IngestionPipeline(
-    #     transformations=[
-    #         SentenceSplitter(chunk_size=8192, chunk_overlap=0),
-    #         OpenAIEmbedding(model="text-embedding-3-small", api_key=OA_TOKEN),
-    #     ],
-    #     vector_store=vector_store
-    # )
-    #
-    # nodes = pipeline.run(documents=documents)
-
     embed_model = OpenAIEmbedding(model="text-embedding-3-small", api_key=OA_TOKEN)
     index = VectorStoreIndex.from_vector_store(vector_store, embed_model=embed_model)
 
-    # llm = HuggingFaceInferenceAPI(model_name="Qwen/Qwen2.5-Coder-32B-Instruct", token=HF_TOKEN)
     llm = OpenAI(model="gpt-4o-mini", temperature=0, api_key=OA_TOKEN)
 
     query_engine = index.as_query_engine(
+        streaming=False,
         llm=llm,
         response_mode="tree_summarize", # other options are refine, compact
     )
@@ -75,6 +68,8 @@ if __name__=="__main__":
     response = query_engine.query(system_prompt)
     print(response)
 
+    # for text in response.response_gen:
+    #     print(text)
 
     with open(Path.cwd().parent.parent.joinpath(f"tmp/{file_name_to_save}"), "w+", encoding="utf-8") as file:
         file.write(f"System Prompt: {system_prompt}\n\n")
